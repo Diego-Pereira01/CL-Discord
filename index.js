@@ -41,7 +41,7 @@ rl.question(chalk.yellow('\n🔐 Insira seu token secreto: '), async (token) => 
   client.on('ready', async () => {
     console.clear();
     console.log(chalk.greenBright.bold(`\n✅ Acesso concedido: ${client.user.username} online e operacional.\n`));
-    
+
     async function solicitarIdEApagar() {
       rl.question(chalk.blue('\n🎯 Alvo - Digite o ID do usuário para interceptar e apagar mensagens: '), async (userId) => {
         try {
@@ -65,16 +65,34 @@ rl.question(chalk.yellow('\n🔐 Insira seu token secreto: '), async (token) => 
             if (fetched.size > 0) lastMessageId = fetched.last().id;
           } while (fetched.size === 100);
 
+          function formatDuration(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const days = Math.floor(totalSeconds / 86400);
+            const hours = Math.floor((totalSeconds % 86400) / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            return `${days}d, ${hours}h, ${minutes}m, ${seconds}s`;
+          }
+
+          // Dentro do seu código:
           let count = 0;
+          const startTime = Date.now(); // início
+
           for (const msg of allMessages) {
             console.log(chalk.white(`💬 ${chalk.bold(msg.content || '[Mensagem secreta]')}`));
-            await msg.delete().catch(() => {});
+            await msg.delete().catch(() => { });
             count++;
             console.log(chalk.gray(`🗑️ Removida com sucesso... (${count})`));
             await delay(1500);
           }
 
-          console.log(chalk.greenBright(`\n✔️ ${count} mensagens eliminadas do alvo: ${user.username}\n`));
+          const endTime = Date.now(); // fim
+          const duration = formatDuration(endTime - startTime); // usando a função
+
+          console.log(chalk.greenBright(`\n✔️ ${count} mensagens eliminadas do alvo: ${user.username}`));
+          console.log(chalk.blueBright(`⏱️ Tempo total: ${duration}\n`));
+
         } catch (err) {
           console.log(chalk.redBright('\n🚫 Falha na operação.'));
           console.error(err);
